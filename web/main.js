@@ -115,7 +115,9 @@
 			let clone = template.content.cloneNode(true);
 
 			// Set values
-			clone.querySelector(".word").innerHTML = `${item.word} (${item.distance.toFixed(3)})`;
+			clone.querySelector(".item").title = `Score: ${item.distance.toFixed(3)}`;
+			clone.querySelector(".word").innerHTML = item.word;
+			clone.querySelector(".word").dataset["grade"] = Math.round(item.distance * 2) / 2;
 			clone.querySelector(".emoji").innerHTML = item.emoji;
 			clone.querySelector(".name").innerHTML = item.name;
 
