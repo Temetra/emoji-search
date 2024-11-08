@@ -160,7 +160,7 @@
 
 		// Add random emoji to title
 		let idx = Math.floor(Math.random() * emojidata.length - 1);
-		document.title = `${document.title} ${emojidata[idx][0]}`;
+		document.title = document.title.split(" ").join(` ${emojidata[idx][0]} `);
 
 		// Init search box
 		let ele = document.querySelector(".search input[type='text']");
