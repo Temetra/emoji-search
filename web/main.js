@@ -1,31 +1,25 @@
 (function () {
 	let emojidata = null;
 
-	let distance = DamerauLevenshtein({
-		insert: (c, i) => 1.75 / i,
-		remove: 2,
-		substitute: 2,
-		transpose: 0.75
-	});
-
-	let threshold = 2;
-
+	// Threshold for results
+	const distanceThreshold = 2.0;
+	
 	window.addEventListener("DOMContentLoaded", onload);
 
 	// Searchs a list of words for one with the shortest levenshtein distance to the query
 	function getBestDistance(query, words) {
-		let match_dist = Number.MAX_VALUE;
-		let match_word;
+		let bestDist = Number.MAX_VALUE;
+		let bestWord;
 
 		for (const word of words) {
-			let dist = distance(query, word);
-			if (dist <= threshold && dist < match_dist) {
-				match_dist = dist;
-				match_word = word;
+			let dist = osaDistance(query, word);
+			if (dist < distanceThreshold && dist < bestDist) {
+				bestDist = dist;
+				bestWord = word;
 			}
 		}
 
-		return [match_dist, match_word];
+		return { distance: bestDist, word: bestWord };
 	}
 
 	function splitName(n) {
@@ -44,37 +38,35 @@
 		if (emojidata) {
 			query = query.trim();
 			if (query.length > 1) {
-				for (const emoji of emojidata) {
+				for (const [emoji, name, descs] of emojidata) {
 					// Get best distance for name
-					let words = splitName(emoji[1]).filter(wordFilter);
-					let [name_dist, name_word] = getBestDistance(query, words);
+					let words = splitName(name).filter(wordFilter);
+					let bestName = getBestDistance(query, words);
 
 					// Get best distance for descriptive words
-					words = emoji[2].filter(wordFilter);
-					let [extra_dist, extra_word] = getBestDistance(query, words);
+					words = descs.filter(wordFilter);
+					let bestDesc = getBestDistance(query, words);
 
-					// Add best result
-					if (extra_dist < name_dist) {
-						results.push({
-							distance: extra_dist,
-							word: extra_word,
-							emoji: emoji[0],
-							name: emoji[1]
-						});
-					}
-					else if (name_dist < Number.MAX_VALUE) {
-						results.push({
-							distance: name_dist,
-							word: name_word,
-							emoji: emoji[0],
-							name: emoji[1]
-						});
+					// Determine best result
+					let bestResult = bestDesc.distance < bestName.distance ? bestDesc
+						: bestName.distance < Number.MAX_VALUE ? bestName
+							: null;
+
+					// Save
+					if (bestResult != null) {
+						results.push({ ...bestResult, emoji, name });
 					}
 				}
 			}
 		}
 
 		if (results.length > 0) {
+			results.sort((a, b) =>
+				a.distance - b.distance
+				|| a.word.localeCompare(b.word)
+				|| a.name.localeCompare(b.name)
+			);
+
 			showResults(results);
 		}
 		else {
@@ -102,22 +94,18 @@
 			ele.classList.add("clickable");
 		}
 
-		// Sort results
-		items.sort((a, b) =>
-			a.distance - b.distance
-			|| a.word.localeCompare(b.word)
-			|| a.name.localeCompare(b.name)
-		);
-
 		// Output results
 		let template = document.querySelector("template[name='template-item']");
 		for (const item of items) {
-			let clone = template.content.cloneNode(true);
+			// Get ratio
+			let ratio = 100 - (item.distance / distanceThreshold * 100);
+			let grade = Math.round(ratio / 20) * 20;
 
-			// Set values
-			clone.querySelector(".item").title = `Score: ${item.distance.toFixed(3)}`;
+			// Clone template
+			let clone = template.content.cloneNode(true);
+			clone.querySelector(".item").title = `Score: ${item.distance.toFixed(3)} (${ratio.toFixed(1)}%)`;
 			clone.querySelector(".word").innerHTML = item.word;
-			clone.querySelector(".word").dataset["grade"] = Math.round(item.distance * 2) / 2;
+			clone.querySelector(".word").dataset["grade"] = grade;
 			clone.querySelector(".emoji").innerHTML = item.emoji;
 			clone.querySelector(".name").innerHTML = item.name;
 

@@ -111,7 +111,7 @@ body {
 
 .name {
 	font-size: 1.2em;
-	margin: 16px 0;
+	margin: 16px 0 8px 0;
 }
 
 .word {
@@ -122,11 +122,11 @@ body {
 	color: white;
 }
 
-.word[data-grade='0'] { --grade-color: #ff69b4; }
-.word[data-grade='0.5'] { --grade-color: #f263ab; }
-.word[data-grade='1'] { --grade-color: #bf4e86; }
-.word[data-grade='1.5'] { --grade-color: #8c3962; }
-.word[data-grade='2'] { --grade-color: #59243e; }
+.word[data-grade='100'] { --grade-color: #ff69b4; }
+.word[data-grade='80'] { --grade-color: #f263ab; }
+.word[data-grade='60'] { --grade-color: #bf4e86; }
+.word[data-grade='40'] { --grade-color: #8c3962; }
+.word[data-grade='20'] { --grade-color: #59243e; }
 
 .clickable .item {
 	cursor: pointer;
