@@ -34,9 +34,9 @@
 
 	function search(query) {
 		let results = [];
+		query = query.trim();
 
 		if (emojidata) {
-			query = query.trim();
 			if (query.length > 1) {
 				for (const [emoji, name, descs] of emojidata) {
 					// Get best distance for name
@@ -70,19 +70,22 @@
 
 			showResults(results);
 		}
+		else if (query.length > 1) {
+			showTemplate("error");
+		}
 		else {
-			showIntro();
+			showTemplate("intro");
 		}
 
 		// Update location
 		updateLocation(query);
 	}
 
-	function showIntro() {
-		let template = document.querySelector("template[name='template-intro']");
+	function showTemplate(name) {
+		let template = document.querySelector(`template[name='template-${name}']`);
 		let clone = template.content.cloneNode(true);
 		let ele = document.querySelector("#output");
-		ele.className = "intro";
+		ele.className = name;
 		ele.innerHTML = "";
 		ele.appendChild(clone);
 	}

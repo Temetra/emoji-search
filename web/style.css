@@ -65,13 +65,31 @@ body {
 #output {
 	display: flex;
 	flex-wrap: wrap;
-	justify-content: space-evenly;
 }
 
-.intro {
-	flex-grow: 1;
-	align-content: center;
+.intro, .error {
+	padding: 24px 24px 0 24px;
+	font-size: 2em;
+	line-height: 2.5em;
+	display: flex;
+	flex-direction: column;
+}
+
+.intro p, .error p {
 	text-align: center;
+	margin: 0;
+}
+
+.intro a, .error a {
+	margin: 0 8px;
+	text-decoration: none;
+	padding: 12px;
+	border-radius: 12px;
+	border: solid 4px lightpink;
+}
+
+.intro a:hover, .error a:hover {
+	border-color: hotpink;
 }
 
 .results {
