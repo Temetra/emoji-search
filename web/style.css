@@ -1,3 +1,10 @@
+@font-face {
+	font-family: 'open_sansregular';
+	src: url('OpenSans-Regular-webfont.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+}
+
 *,
 *::before,
 *::after {
@@ -19,7 +26,7 @@ body {
 }
 
 body {
-	font-family: sans-serif;
+	font-family: 'open_sansregular', Arial, Helvetica, sans-serif;
 	display: flex;
 	flex-direction: column;
 }
@@ -67,29 +74,30 @@ body {
 	flex-wrap: wrap;
 }
 
-.intro, .error {
-	padding: 24px 24px 0 24px;
-	font-size: 2em;
-	line-height: 2.5em;
+.intro,
+.error {
+	margin: 0 24px;
 	display: flex;
 	flex-direction: column;
+	font-size: 2em;
 }
 
-.intro p, .error p {
+.intro p,
+.error p {
 	text-align: center;
-	margin: 0;
+	margin-bottom: 0;
 }
 
-.intro a, .error a {
-	margin: 0 8px;
+.intro a,
+.error a {
 	text-decoration: none;
-	padding: 12px;
-	border-radius: 12px;
-	border: solid 4px lightpink;
+	padding: 8px;
 }
 
-.intro a:hover, .error a:hover {
-	border-color: hotpink;
+.intro a:hover, 
+.error a:hover {
+	background-color:hotpink;
+	border-radius: 32px;
 }
 
 .results {
