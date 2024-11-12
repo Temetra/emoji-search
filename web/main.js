@@ -60,6 +60,7 @@
 			}
 		}
 
+		// Update page
 		if (results.length > 0) {
 			results.sort((a, b) =>
 				a.distance - b.distance
@@ -72,6 +73,11 @@
 		else {
 			showIntro();
 		}
+
+		// Update location
+		let url = new URL(window.location);
+		url.search = query.length > 1 ? `?${query}` : "";
+		history.pushState(null, "", url);
 	}
 
 	function showIntro() {
@@ -157,6 +163,15 @@
 		ele.addEventListener("input", (evt) => search(evt.target.value));
 		ele.select();
 		ele.focus();
+
+		// Get query from location
+		let params = new URLSearchParams(window.location.search);
+		if (params.size > 0) {
+			let query = params.keys().next().value;
+			ele.value = query;
+		}
+
+		// Perform search
 		search(ele.value);
 
 		// Init clear button
