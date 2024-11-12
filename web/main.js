@@ -3,7 +3,7 @@
 
 	// Threshold for results
 	const distanceThreshold = 2.0;
-	
+
 	window.addEventListener("DOMContentLoaded", onload);
 
 	// Searchs a list of words for one with the shortest levenshtein distance to the query
@@ -75,9 +75,7 @@
 		}
 
 		// Update location
-		let url = new URL(window.location);
-		url.search = query.length > 1 ? `?${query}` : "";
-		history.pushState(null, "", url);
+		updateLocation(query);
 	}
 
 	function showIntro() {
@@ -133,6 +131,23 @@
 		}
 		navigator.clipboard.writeText(target.innerHTML);
 	}
+
+	function debounced(fn, delay = 500) {
+		let timer;
+		return (...args) => {
+			clearTimeout(timer);
+			timer = setTimeout(() => { fn.apply(this, args); }, delay);
+		};
+	}
+
+	const updateLocation = debounced((query) => {
+		let search = query.length > 1 ? `?${query}` : "";
+		let url = new URL(window.location);
+		if (url.search !== search) {
+			url.search = search;
+			history.pushState(null, "", url);
+		}
+	});
 
 	function clear(evt) {
 		let ele = document.querySelector(".search input[type='text']");
