@@ -136,12 +136,12 @@ body {
 }
 
 .name {
-	font-size: 1.2em;
+	font-size: 1.5em;
 	margin: 16px 0 8px 0;
 }
 
 .word {
-	padding: 4px 6px;
+	padding: 4px 8px;
 	border-radius: 5px;
 	--grade-color: grey;
 	background: var(--grade-color);
