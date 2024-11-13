@@ -143,16 +143,16 @@ body {
 .word {
 	padding: 4px 8px;
 	border-radius: 5px;
-	--grade-color: grey;
-	background: var(--grade-color);
+	--rank-color: grey;
+	background: var(--rank-color);
 	color: white;
 }
 
-.word[data-grade='100'] { --grade-color: #ff69b4; }
-.word[data-grade='80'] { --grade-color: #f263ab; }
-.word[data-grade='60'] { --grade-color: #bf4e86; }
-.word[data-grade='40'] { --grade-color: #8c3962; }
-.word[data-grade='20'] { --grade-color: #59243e; }
+.word[data-rank='0'] { --rank-color: #ff69b4; }
+.word[data-rank='1'] { --rank-color: #f263ab; }
+.word[data-rank='2'] { --rank-color: #bf4e86; }
+.word[data-rank='3'] { --rank-color: #8c3962; }
+.word[data-rank='4'] { --rank-color: #59243e; }
 
 .clickable .item {
 	cursor: pointer;

@@ -1,10 +1,53 @@
 (function () {
 	let emojidata = null;
 
-	// Threshold for results
-	const distanceThreshold = 2.0;
+	// (0..Number.MAX_VALUE) 
+	// Emoji outside of this don't get added to results
+	const distanceThreshold = 1.0;
+
+	// (0..100) 
+	// Emoji outside of this don't get displayed 
+	const ratioThreshold = 0;
 
 	window.addEventListener("DOMContentLoaded", onload);
+
+	function onload() {
+		fetch("emoji-en-US-reshaped.json")
+			.then(response => {
+				if (!response.ok) throw new Error(`HTTP error: ${res.status}`);
+				return response.json();
+			})
+			.then(data => prepare(data))
+			.catch(err => console.log(err));
+	}
+
+	function prepare(data) {
+		emojidata = data;
+
+		// Add random emoji to title
+		let idx = Math.floor(Math.random() * emojidata.length - 1);
+		document.title = document.title.split(" ").join(` ${emojidata[idx][0]} `);
+
+		// Init search box
+		let ele = document.querySelector(".search input[type='text']");
+		ele.addEventListener("input", (evt) => searchDebounced(evt.target.value));
+		ele.select();
+		ele.focus();
+
+		// Get query from location
+		let params = new URLSearchParams(window.location.search);
+		if (params.size > 0) {
+			let query = params.keys().next().value;
+			ele.value = query;
+		}
+
+		// Perform search
+		search(ele.value);
+
+		// Init clear button
+		ele = document.querySelector(".search svg");
+		ele.addEventListener("click", clear);
+	}
 
 	// Searchs a list of words for one with the shortest levenshtein distance to the query
 	function getBestDistance(query, words) {
@@ -13,7 +56,7 @@
 
 		for (const word of words) {
 			let dist = osaDistance(query, word);
-			if (dist < distanceThreshold && dist < bestDist) {
+			if (dist <= distanceThreshold && dist < bestDist) {
 				bestDist = dist;
 				bestWord = word;
 			}
@@ -22,18 +65,11 @@
 		return { distance: bestDist, word: bestWord };
 	}
 
-	function splitName(n) {
-		return n.replaceAll(" ", "_").split("_");
-	}
-
-	function wordFilter(w) {
-		return w.length > 2
-			&& w != "the"
-			&& w != "and";
-	}
-
 	function search(query) {
-		let results = [];
+		let results = [], 
+			minDistance = Number.MAX_VALUE, 
+			maxDistance = 0;
+
 		query = query.trim();
 
 		if (emojidata) {
@@ -55,6 +91,8 @@
 					// Save
 					if (bestResult != null) {
 						results.push({ ...bestResult, emoji, name });
+						minDistance = Math.min(bestResult.distance, minDistance);
+						maxDistance = Math.max(bestResult.distance, maxDistance);
 					}
 				}
 			}
@@ -68,7 +106,7 @@
 				|| a.name.localeCompare(b.name)
 			);
 
-			showResults(results);
+			showResults(results, minDistance, maxDistance);
 		}
 		else if (query.length > 1) {
 			showTemplate("error");
@@ -81,6 +119,22 @@
 		updateLocation(query);
 	}
 
+	function copyEmoji(evt) {
+		let target = evt.target;
+		if (!target.classList.contains("emoji")) {
+			target = target.parentNode.querySelector(".emoji");
+		}
+		navigator.clipboard.writeText(target.innerHTML);
+	}
+
+
+	function clear(evt) {
+		let ele = document.querySelector(".search input[type='text']");
+		ele.value = "";
+		ele.focus();
+		search("");
+	}
+
 	function showTemplate(name) {
 		let template = document.querySelector(`template[name='template-${name}']`);
 		let clone = template.content.cloneNode(true);
@@ -90,7 +144,9 @@
 		ele.appendChild(clone);
 	}
 
-	function showResults(items) {
+	function showResults(items, minDistance, maxDistance) {
+		console.log(`Showing ${items.length} out of ${emojidata.length}`);
+
 		// Set output
 		let ele = document.querySelector("#output");
 		ele.className = "results";
@@ -104,15 +160,18 @@
 		// Output results
 		let template = document.querySelector("template[name='template-item']");
 		for (const item of items) {
-			// Get ratio
-			let ratio = 100 - (item.distance / distanceThreshold * 100);
-			let grade = Math.round(ratio / 20) * 20;
+			// Stop iterating if past threshold
+			let ratio = 100 - ((item.distance - minDistance) / maxDistance * 100);
+			if (ratio < ratioThreshold) break;
+
+			// Used for colour of word bubble
+			let rank = Math.round(((100 - ratio) / (100 - ratioThreshold)) * 5);
 
 			// Clone template
 			let clone = template.content.cloneNode(true);
 			clone.querySelector(".item").title = `Score: ${item.distance.toFixed(3)} (${ratio.toFixed(1)}%)`;
 			clone.querySelector(".word").innerHTML = item.word;
-			clone.querySelector(".word").dataset["grade"] = grade;
+			clone.querySelector(".word").dataset["rank"] = rank;
 			clone.querySelector(".emoji").innerHTML = item.emoji;
 			clone.querySelector(".name").innerHTML = item.name;
 
@@ -127,15 +186,26 @@
 		}
 	}
 
-	function copyEmoji(evt) {
-		let target = evt.target;
-		if (!target.classList.contains("emoji")) {
-			target = target.parentNode.querySelector(".emoji");
-		}
-		navigator.clipboard.writeText(target.innerHTML);
+	function splitName(n) {
+		return n.replaceAll(" ", "_").split("_");
 	}
 
-	function debounced(fn, delay = 500) {
+	function wordFilter(w) {
+		return w.length > 2
+			&& w != "the"
+			&& w != "and";
+	}
+
+	function updateLocation(query) {
+		let search = query.length > 1 ? `?${query}` : "";
+		let url = new URL(window.location);
+		if (url.search !== search) {
+			url.search = search;
+			history.pushState(null, "", url);
+		}
+	}
+
+	function debounced(fn, delay = 50) {
 		let timer;
 		return (...args) => {
 			clearTimeout(timer);
@@ -143,57 +213,5 @@
 		};
 	}
 
-	const updateLocation = debounced((query) => {
-		let search = query.length > 1 ? `?${query}` : "";
-		let url = new URL(window.location);
-		if (url.search !== search) {
-			url.search = search;
-			history.pushState(null, "", url);
-		}
-	});
-
-	function clear(evt) {
-		let ele = document.querySelector(".search input[type='text']");
-		ele.value = "";
-		ele.focus();
-		search("");
-	}
-
-	function onload() {
-		fetch("emoji-en-US-reshaped.json")
-			.then(response => {
-				if (!response.ok) throw new Error(`HTTP error: ${res.status}`);
-				return response.json();
-			})
-			.then(data => prepare(data))
-			.catch(err => console.log(err));
-	}
-
-	function prepare(data) {
-		emojidata = data;
-
-		// Add random emoji to title
-		let idx = Math.floor(Math.random() * emojidata.length - 1);
-		document.title = document.title.split(" ").join(` ${emojidata[idx][0]} `);
-
-		// Init search box
-		let ele = document.querySelector(".search input[type='text']");
-		ele.addEventListener("input", (evt) => search(evt.target.value));
-		ele.select();
-		ele.focus();
-
-		// Get query from location
-		let params = new URLSearchParams(window.location.search);
-		if (params.size > 0) {
-			let query = params.keys().next().value;
-			ele.value = query;
-		}
-
-		// Perform search
-		search(ele.value);
-
-		// Init clear button
-		ele = document.querySelector(".search svg");
-		ele.addEventListener("click", clear);
-	}
+	const searchDebounced = debounced(search, 250);
 })();

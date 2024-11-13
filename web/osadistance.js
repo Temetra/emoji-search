@@ -1,12 +1,18 @@
 // Optimal string alignment distance
 // https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance
-// Costs configured for word completion
 
 function osaDistance(a, b) {
-	const insertion = (i, j) => j > i ? 1 / j : 2;
-	const deletion = 2;
-	const substitution = (x, y) => x === y ? 0 : 2;
-	const transposition = 2;
+	// Costs configured for word completion
+	const insertion = (i, j) => j > i ? 1 / j : 3;
+	const deletion = 1;
+	const substitution = (x, y) => x === y ? 0 : 1;
+	const transposition = 1;
+
+	// Regular costs
+	// const insertion = (i, j) => 1;
+	// const deletion = 1;
+	// const substitution = (x, y) => x === y ? 0 : 1;
+	// const transposition = 1;
 
 	const d = Array(a.length + 1);
 	// note that d is zero-indexed, while a and b are one-indexed.
