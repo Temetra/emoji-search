@@ -161,7 +161,9 @@
 		let template = document.querySelector("template[name='template-item']");
 		for (const item of items) {
 			// Stop iterating if past threshold
-			let ratio = 100 - ((item.distance - minDistance) / maxDistance * 100);
+			let ratio = (maxDistance > minDistance)
+				? 100 - ((item.distance - minDistance) / maxDistance * 100)
+				: 100;
 			if (ratio < ratioThreshold) break;
 
 			// Used for colour of word bubble
