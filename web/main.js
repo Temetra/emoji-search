@@ -3,7 +3,7 @@
 
 	// (0..Number.MAX_VALUE) 
 	// Emoji outside of this don't get added to results
-	const distanceThreshold = 1.0;
+	const distanceThreshold = 2.0;
 
 	// (0..100) 
 	// Emoji outside of this don't get displayed 
@@ -183,7 +183,9 @@
 	}
 
 	function splitName(n) {
-		return n.replaceAll(" ", "_").split("_");
+		let a = n.replaceAll(" ", "_").split("_");
+		a.push(n.replace("_", " "));
+		return a;
 	}
 
 	function wordFilter(w) {

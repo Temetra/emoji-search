@@ -3,10 +3,10 @@
 
 function osaDistance(a, b) {
 	// Costs configured for word completion
-	const insertion = (i, j) => j > i ? 1 / j : 3;
-	const deletion = 1;
-	const substitution = (x, y) => x === y ? 0 : 1;
-	const transposition = 1;
+	const insertion = (i, j) => j > i ? 2 / j : 5;
+	const deletion = 5;
+	const substitution = (x, y) => x === y ? 0 : 2;
+	const transposition = 2;
 
 	// Regular costs
 	// const insertion = (i, j) => 1;
