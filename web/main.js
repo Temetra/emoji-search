@@ -67,21 +67,32 @@
 		query = query.toLowerCase();
 
 		if (emojidata) {
+			// If input is emoji, use the first descriptive word as the query
+			if (/\p{Emoji}/u.test(query)) {
+				let found = emojidata.find(
+					([emoji, name, descs]) => emoji === query
+				);
+				query = found != undefined ? found[2][0] : query;
+			}
+			
+			// Perform search
 			if (query.length > 1) {
+				console.log(`Searching for "${query}"`);
+
 				for (const [emoji, name, descs] of emojidata) {
 					// Get best distance for name
 					let words = splitName(name).filter(wordFilter);
 					let bestName = getBestDistance(query, words);
-
+		
 					// Get best distance for descriptive words
 					words = descs.filter(wordFilter);
 					let bestDesc = getBestDistance(query, words);
-
+		
 					// Determine best result
 					let bestResult = bestDesc.distance < bestName.distance ? bestDesc
 						: bestName.distance < Number.MAX_VALUE ? bestName
 							: null;
-
+		
 					// Save
 					if (bestResult != null) {
 						results.push({ ...bestResult, emoji, name, descs });
@@ -200,9 +211,7 @@
 	}
 
 	function wordFilter(w) {
-		return w.length > 2
-			&& w != "the"
-			&& w != "and";
+		return w != "the" && w != "and";
 	}
 
 	function getQueryFromLocation() {
