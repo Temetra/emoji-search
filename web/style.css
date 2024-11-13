@@ -94,9 +94,9 @@ body {
 	padding: 8px;
 }
 
-.intro a:hover, 
+.intro a:hover,
 .error a:hover {
-	background-color:hotpink;
+	background-color: hotpink;
 	border-radius: 32px;
 }
 
@@ -129,7 +129,10 @@ body {
 .name,
 .word {
 	overflow: hidden;
-	text-wrap: nowrap;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	/* 	text-wrap: wrap; */
+	/* 	overflow-wrap: anywhere; */
 	text-align: center;
 	align-self: end;
 	justify-self: center;
@@ -138,6 +141,7 @@ body {
 .name {
 	font-size: 1.5em;
 	margin: 16px 0 8px 0;
+	width: 100%;
 }
 
 .word {
