@@ -28,8 +28,12 @@
 		let idx = Math.floor(Math.random() * emojidata.length - 1);
 		document.title = document.title.split(" ").join(` ${emojidata[idx][0]} `);
 
+		// Init clear button
+		let ele = document.querySelector(".search svg");
+		ele.addEventListener("click", clear);
+
 		// Init search box
-		let ele = document.querySelector(".search input[type='text']");
+		ele = document.querySelector(".search input[type='text']");
 		ele.value = getQueryFromLocation() || ele.value;
 		ele.addEventListener("input", (evt) => searchDebounced(evt.target.value));
 		ele.select();
@@ -37,10 +41,6 @@
 
 		// Perform search
 		search(ele.value);
-
-		// Init clear button
-		ele = document.querySelector(".search svg");
-		ele.addEventListener("click", clear);
 	}
 
 	// Searchs a list of words for one with the shortest levenshtein distance to the query
