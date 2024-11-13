@@ -30,16 +30,10 @@
 
 		// Init search box
 		let ele = document.querySelector(".search input[type='text']");
+		ele.value = getQueryFromLocation() || ele.value;
 		ele.addEventListener("input", (evt) => searchDebounced(evt.target.value));
 		ele.select();
 		ele.focus();
-
-		// Get query from location
-		let params = new URLSearchParams(window.location.search);
-		if (params.size > 0) {
-			let query = params.keys().next().value;
-			ele.value = query;
-		}
 
 		// Perform search
 		search(ele.value);
@@ -70,7 +64,7 @@
 			minDistance = Number.MAX_VALUE, 
 			maxDistance = 0;
 
-		query = query.trim();
+		query = query.trim().toLowerCase();
 
 		if (emojidata) {
 			if (query.length > 1) {
@@ -196,6 +190,15 @@
 		return w.length > 2
 			&& w != "the"
 			&& w != "and";
+	}
+
+	function getQueryFromLocation() {
+		let params = new URLSearchParams(window.location.search);
+		// URLSearchParams.size not reported when targeting Safari / iOS <17 
+		if (Array.from(params).length > 0) {
+			return params.keys().next().value;
+		}
+		return null;
 	}
 
 	function updateLocation(query) {
