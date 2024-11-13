@@ -198,7 +198,7 @@ footer {
 	}
 }
 
-.clickable .item:focus {
+.copied {
 	outline: none;
 	animation-name: itemFocus;
 	animation-timing-function: cubic-bezier;

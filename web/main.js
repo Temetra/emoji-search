@@ -64,7 +64,7 @@
 			minDistance = Number.MAX_VALUE, 
 			maxDistance = 0;
 
-		query = query.toLowerCase();
+		query = query.trim().toLowerCase();
 
 		if (emojidata) {
 			// If input is emoji, use the first descriptive word as the query
@@ -124,14 +124,12 @@
 		updateLocation(query);
 	}
 
-	function copyEmoji(evt) {
-		let target = evt.target;
-		if (!target.classList.contains("emoji")) {
-			target = target.parentNode.querySelector(".emoji");
-		}
-		navigator.clipboard.writeText(target.innerHTML);
+	function copyEmoji(emoji, name, ele) {
+		navigator.clipboard.writeText(emoji);
+		ele.classList.add("copied");
+		setTimeout(() => ele.classList.remove("copied"), 1000);
+		console.log(`Copied ${emoji} "${name}" to clipboard`);
 	}
-
 
 	function clear(evt) {
 		let ele = document.querySelector(".search input[type='text']");
@@ -196,8 +194,7 @@
 
 			// Enable copying to clipboard if available
 			if (navigator.clipboard) {
-				clone.item.tabIndex = 0;
-				clone.item.onclick = copyEmoji;
+				clone.item.onclick = (evt) => copyEmoji(item.emoji, item.name, clone.item);
 			}
 
 			ele.appendChild(clone.node);
