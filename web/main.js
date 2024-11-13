@@ -3,7 +3,7 @@
 
 	// (0..Number.MAX_VALUE) 
 	// Emoji outside of this don't get added to results
-	const distanceThreshold = 2.0;
+	const distanceThreshold = 2.5;
 
 	// (0..100) 
 	// Emoji outside of this don't get displayed 
@@ -64,7 +64,7 @@
 			minDistance = Number.MAX_VALUE, 
 			maxDistance = 0;
 
-		query = query.trim().toLowerCase();
+		query = query.toLowerCase();
 
 		if (emojidata) {
 			if (query.length > 1) {
@@ -84,7 +84,7 @@
 
 					// Save
 					if (bestResult != null) {
-						results.push({ ...bestResult, emoji, name });
+						results.push({ ...bestResult, emoji, name, descs });
 						minDistance = Math.min(bestResult.distance, minDistance);
 						maxDistance = Math.max(bestResult.distance, maxDistance);
 					}
@@ -138,6 +138,18 @@
 		ele.appendChild(clone);
 	}
 
+	let itemTemplate = null;
+
+	function cloneItemTemplate() {
+		itemTemplate = itemTemplate ?? document.querySelector("template[name='template-item']");
+		let node = itemTemplate.content.cloneNode(true);
+		let item = node.querySelector(".item");
+		let word = node.querySelector(".word");
+		let emoji = node.querySelector(".emoji");
+		let name = node.querySelector(".name");
+		return { node, item, word, emoji, name };
+	}
+
 	function showResults(items, minDistance, maxDistance) {
 		console.log(`Showing ${items.length} out of ${emojidata.length}`);
 
@@ -152,7 +164,6 @@
 		}
 
 		// Output results
-		let template = document.querySelector("template[name='template-item']");
 		for (const item of items) {
 			// Stop iterating if past threshold
 			let ratio = (maxDistance > minDistance)
@@ -164,21 +175,21 @@
 			let rank = Math.round(((100 - ratio) / (100 - ratioThreshold)) * 5);
 
 			// Clone template
-			let clone = template.content.cloneNode(true);
-			clone.querySelector(".item").title = `Score: ${item.distance.toFixed(3)} (${ratio.toFixed(1)}%)`;
-			clone.querySelector(".word").innerHTML = item.word;
-			clone.querySelector(".word").dataset["rank"] = rank;
-			clone.querySelector(".emoji").innerHTML = item.emoji;
-			clone.querySelector(".name").innerHTML = item.name;
+			let clone = cloneItemTemplate();
+			clone.item.title = item.descs.join(", ");
+			clone.word.innerHTML = item.word;
+			clone.word.title = `Score: ${item.distance.toFixed(3)} (${ratio.toFixed(1)}%)`;
+			clone.word.dataset["rank"] = rank;
+			clone.emoji.innerHTML = item.emoji;
+			clone.name.innerHTML = item.name;
 
 			// Enable copying to clipboard if available
 			if (navigator.clipboard) {
-				let container = clone.querySelector(".item");
-				container.tabIndex = 0;
-				container.onclick = copyEmoji;
+				clone.item.tabIndex = 0;
+				clone.item.onclick = copyEmoji;
 			}
 
-			ele.appendChild(clone);
+			ele.appendChild(clone.node);
 		}
 	}
 
